@@ -1,0 +1,944 @@
+---
+
+title: callbacks.tracker
+keywords: fastai
+sidebar: home_sidebar
+
+summary: "Callbacks that take decisions depending on the evolution of metrics during training"
+---
+
+<div class="container" id="notebook-container">
+    
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Tracking-Callbacks">Tracking Callbacks<a class="anchor-link" href="#Tracking-Callbacks">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This module regroups the callbacks that track one of the metrics computed at the end of each epoch to take some decision about training. To show examples of use, we'll use our sample of MNIST and a simple cnn model.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">untar_data</span><span class="p">(</span><span class="n">URLs</span><span class="o">.</span><span class="n">MNIST_SAMPLE</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ImageDataBunch</span><span class="o">.</span><span class="n">from_folder</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="TerminateOnNaNCallback"><code>class</code> <code>TerminateOnNaNCallback</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L9" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>TerminateOnNaNCallback</code>() :: <a href="/callback.html#Callback"><code>Callback</code></a></p>
+</blockquote>
+<p>A <a href="/callback.html#Callback"><code>Callback</code></a> that terminates training if loss is NaN.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Sometimes, training diverges and the loss goes to nan. In that case, there's no point continuing, so this callback stops the training.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">simple_cnn</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">learn</span> <span class="o">=</span> <span class="n">Learner</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="n">accuracy</span><span class="p">])</span>
+<span class="n">learn</span><span class="o">.</span><span class="n">fit_one_cycle</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mf">1e4</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>epoch</th>
+      <th>train_loss</th>
+      <th>valid_loss</th>
+      <th>accuracy</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>nan</td>
+      <td>nan</td>
+      <td>0.495584</td>
+      <td>00:02</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Using it prevents that situation to happen.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">simple_cnn</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">learn</span> <span class="o">=</span> <span class="n">Learner</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="n">accuracy</span><span class="p">],</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">TerminateOnNaNCallback</span><span class="p">()])</span>
+<span class="n">learn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mf">1e4</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+
+    <div>
+        <style>
+            /* Turns off some styling */
+            progress {
+                /* gets rid of default border in Firefox and Opera. */
+                border: none;
+                /* Needs to be in here for Safari polyfill so background images work as expected. */
+                background-size: auto;
+            }
+            .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+                background: #F44336;
+            }
+        </style>
+      <progress value='0' class='' max='2', style='width:300px; height:20px; vertical-align: middle;'></progress>
+      0.00% [0/2 00:00<00:00]
+    </div>
+    
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>epoch</th>
+      <th>train_loss</th>
+      <th>valid_loss</th>
+      <th>accuracy</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table><p>
+
+    <div>
+        <style>
+            /* Turns off some styling */
+            progress {
+                /* gets rid of default border in Firefox and Opera. */
+                border: none;
+                /* Needs to be in here for Safari polyfill so background images work as expected. */
+                background-size: auto;
+            }
+            .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+                background: #F44336;
+            }
+        </style>
+      <progress value='0' class='progress-bar-interrupted' max='32', style='width:300px; height:20px; vertical-align: middle;'></progress>
+      Interrupted
+    </div>
+    
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Epoch/Batch (0/5): Invalid loss, terminating training.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Callback-methods">Callback methods<a class="anchor-link" href="#Callback-methods">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You don't call these yourself - they're called by fastai's <a href="/callback.html#Callback"><code>Callback</code></a> system automatically to enable the class's functionality.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="TerminateOnNaNCallback.on_batch_end"><code>on_batch_end</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L15" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>on_batch_end</code>(<strong><code>last_loss</code></strong>, <strong><code>epoch</code></strong>, <strong><code>num_batch</code></strong>, <strong>**<code>kwargs</code></strong>:<code>Any</code>)</p>
+</blockquote>
+<p>Test if <code>last_loss</code> is NaN and interrupts training.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="TerminateOnNaNCallback.on_epoch_end"><code>on_epoch_end</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L23" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>on_epoch_end</code>(<strong>**<code>kwargs</code></strong>:<code>Any</code>)</p>
+</blockquote>
+<p>Stop the training if necessary.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="EarlyStoppingCallback"><code>class</code> <code>EarlyStoppingCallback</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L56" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>EarlyStoppingCallback</code>(<strong><code>learn</code></strong>:<a href="/basic_train.html#Learner"><code>Learner</code></a>, <strong><code>monitor</code></strong>:<code>str</code>=<strong><em><code>'val_loss'</code></em></strong>, <strong><code>mode</code></strong>:<code>str</code>=<strong><em><code>'auto'</code></em></strong>, <strong><code>min_delta</code></strong>:<code>int</code>=<strong><em><code>0</code></em></strong>, <strong><code>patience</code></strong>:<code>int</code>=<strong><em><code>0</code></em></strong>) :: <a href="/callbacks.tracker.html#TrackerCallback"><code>TrackerCallback</code></a></p>
+</blockquote>
+<p>A <a href="/callbacks.tracker.html#TrackerCallback"><code>TrackerCallback</code></a> that terminates training when monitored quantity stops improving.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This callback tracks the quantity in <code>monitor</code> during the training of <code>learn</code>. <code>mode</code> can be forced to 'min' or 'max' but will automatically try to determine if the quantity should be the lowest possible (validation loss) or the highest possible (accuracy). Will stop training after <code>patience</code> epochs if the quantity hasn't improved by <code>min_delta</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">simple_cnn</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">learn</span> <span class="o">=</span> <span class="n">Learner</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="n">accuracy</span><span class="p">],</span> 
+                <span class="n">callback_fns</span><span class="o">=</span><span class="p">[</span><span class="n">partial</span><span class="p">(</span><span class="n">EarlyStoppingCallback</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="n">min_delta</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">3</span><span class="p">)])</span>
+<span class="n">learn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mf">1e-42</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+
+    <div>
+        <style>
+            /* Turns off some styling */
+            progress {
+                /* gets rid of default border in Firefox and Opera. */
+                border: none;
+                /* Needs to be in here for Safari polyfill so background images work as expected. */
+                background-size: auto;
+            }
+            .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+                background: #F44336;
+            }
+        </style>
+      <progress value='4' class='' max='50', style='width:300px; height:20px; vertical-align: middle;'></progress>
+      8.00% [4/50 00:09<01:52]
+    </div>
+    
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>epoch</th>
+      <th>train_loss</th>
+      <th>valid_loss</th>
+      <th>accuracy</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>0.696629</td>
+      <td>0.696266</td>
+      <td>0.362610</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>0.696333</td>
+      <td>0.696266</td>
+      <td>0.362610</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>0.696307</td>
+      <td>0.696266</td>
+      <td>0.362610</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.696467</td>
+      <td>0.696266</td>
+      <td>0.362610</td>
+      <td>00:02</td>
+    </tr>
+  </tbody>
+</table><p>
+
+    <div>
+        <style>
+            /* Turns off some styling */
+            progress {
+                /* gets rid of default border in Firefox and Opera. */
+                border: none;
+                /* Needs to be in here for Safari polyfill so background images work as expected. */
+                background-size: auto;
+            }
+            .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+                background: #F44336;
+            }
+        </style>
+      <progress value='32' class='' max='32', style='width:300px; height:20px; vertical-align: middle;'></progress>
+      100.00% [32/32 00:00<00:00]
+    </div>
+    
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Epoch 5: early stopping
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Callback-methods">Callback methods<a class="anchor-link" href="#Callback-methods">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You don't call these yourself - they're called by fastai's <a href="/callback.html#Callback"><code>Callback</code></a> system automatically to enable the class's functionality.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="EarlyStoppingCallback.on_train_begin"><code>on_train_begin</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L63" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>on_train_begin</code>(<strong>**<code>kwargs</code></strong>:<code>Any</code>)</p>
+</blockquote>
+<p>Initialize inner arguments.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="EarlyStoppingCallback.on_epoch_end"><code>on_epoch_end</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L68" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>on_epoch_end</code>(<strong><code>epoch</code></strong>, <strong>**<code>kwargs</code></strong>:<code>Any</code>)</p>
+</blockquote>
+<p>Compare the value monitored to its best score and maybe stop training.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="SaveModelCallback"><code>class</code> <code>SaveModelCallback</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L80" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SaveModelCallback</code>(<strong><code>learn</code></strong>:<a href="/basic_train.html#Learner"><code>Learner</code></a>, <strong><code>monitor</code></strong>:<code>str</code>=<strong><em><code>'val_loss'</code></em></strong>, <strong><code>mode</code></strong>:<code>str</code>=<strong><em><code>'auto'</code></em></strong>, <strong><code>every</code></strong>:<code>str</code>=<strong><em><code>'improvement'</code></em></strong>, <strong><code>name</code></strong>:<code>str</code>=<strong><em><code>'bestmodel'</code></em></strong>) :: <a href="/callbacks.tracker.html#TrackerCallback"><code>TrackerCallback</code></a></p>
+</blockquote>
+<p>A <a href="/callbacks.tracker.html#TrackerCallback"><code>TrackerCallback</code></a> that saves the model when monitored quantity is best.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This callback tracks the quantity in <code>monitor</code> during the training of <code>learn</code>. <code>mode</code> can be forced to 'min' or 'max' but will automatically try to determine if the quantity should be the lowest possible (validation loss) or the highest possible (accuracy). Will save the model in <code>name</code> whenever determined by <code>every</code> ('improvement' or 'epoch'). Loads the best model at the end of training is <code>every='improvement'</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">simple_cnn</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">learn</span> <span class="o">=</span> <span class="n">Learner</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="n">accuracy</span><span class="p">])</span>
+<span class="n">learn</span><span class="o">.</span><span class="n">fit_one_cycle</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">SaveModelCallback</span><span class="p">(</span><span class="n">learn</span><span class="p">,</span> <span class="n">every</span><span class="o">=</span><span class="s1">&#39;epoch&#39;</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>epoch</th>
+      <th>train_loss</th>
+      <th>valid_loss</th>
+      <th>accuracy</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>0.678338</td>
+      <td>0.666926</td>
+      <td>0.659470</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>0.563476</td>
+      <td>0.515598</td>
+      <td>0.907753</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>0.370079</td>
+      <td>0.337353</td>
+      <td>0.933268</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.281564</td>
+      <td>0.272560</td>
+      <td>0.936212</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>0.260385</td>
+      <td>0.263720</td>
+      <td>0.936703</td>
+      <td>00:02</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Choosing <code>every='epoch'</code> saves an individual model at the end of each epoch.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>ls ~/.fastai/data/mnist_sample/models
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>bestmodel_1.pth  model_1.pth  model_4.pth    stage-1.pth
+bestmodel_2.pth  model_2.pth  model_5.pth    tmp.pth
+bestmodel_3.pth  model_3.pth  one_epoch.pth  trained_model.pth
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">learn</span><span class="o">.</span><span class="n">fit_one_cycle</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">SaveModelCallback</span><span class="p">(</span><span class="n">learn</span><span class="p">,</span> <span class="n">every</span><span class="o">=</span><span class="s1">&#39;improvement&#39;</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;accuracy&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: left;">
+      <th>epoch</th>
+      <th>train_loss</th>
+      <th>valid_loss</th>
+      <th>accuracy</th>
+      <th>time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>0.238711</td>
+      <td>0.226684</td>
+      <td>0.939156</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>0.181980</td>
+      <td>0.176078</td>
+      <td>0.940628</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>0.159314</td>
+      <td>0.163088</td>
+      <td>0.942100</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>0.160453</td>
+      <td>0.159423</td>
+      <td>0.943081</td>
+      <td>00:02</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>0.159717</td>
+      <td>0.159017</td>
+      <td>0.943081</td>
+      <td>00:02</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Better model found at epoch 1 with accuracy value: 0.9391560554504395.
+Better model found at epoch 2 with accuracy value: 0.9406280517578125.
+Better model found at epoch 3 with accuracy value: 0.9421001076698303.
+Better model found at epoch 4 with accuracy value: 0.9430814385414124.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Choosing <code>every='improvement'</code> saves the single best model out of all epochs during training.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>ls ~/.fastai/data/mnist_sample/models
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>best.pth	 bestmodel_3.pth  model_3.pth  one_epoch.pth  trained_model.pth
+bestmodel_1.pth  model_1.pth	  model_4.pth  stage-1.pth
+bestmodel_2.pth  model_2.pth	  model_5.pth  tmp.pth
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Callback-methods">Callback methods<a class="anchor-link" href="#Callback-methods">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You don't call these yourself - they're called by fastai's <a href="/callback.html#Callback"><code>Callback</code></a> system automatically to enable the class's functionality.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="SaveModelCallback.on_epoch_end"><code>on_epoch_end</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L89" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>on_epoch_end</code>(<strong><code>epoch</code></strong>, <strong>**<code>kwargs</code></strong>:<code>Any</code>)</p>
+</blockquote>
+<p>Compare the value monitored to its best score and maybe save the model.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="SaveModelCallback.on_train_end"><code>on_train_end</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L99" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>on_train_end</code>(<strong>**<code>kwargs</code></strong>)</p>
+</blockquote>
+<p>Load the best model.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="ReduceLROnPlateauCallback"><code>class</code> <code>ReduceLROnPlateauCallback</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L104" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ReduceLROnPlateauCallback</code>(<strong><code>learn</code></strong>:<a href="/basic_train.html#Learner"><code>Learner</code></a>, <strong><code>monitor</code></strong>:<code>str</code>=<strong><em><code>'val_loss'</code></em></strong>, <strong><code>mode</code></strong>:<code>str</code>=<strong><em><code>'auto'</code></em></strong>, <strong><code>patience</code></strong>:<code>int</code>=<strong><em><code>0</code></em></strong>, <strong><code>factor</code></strong>:<code>float</code>=<strong><em><code>0.2</code></em></strong>, <strong><code>min_delta</code></strong>:<code>int</code>=<strong><em><code>0</code></em></strong>) :: <a href="/callbacks.tracker.html#TrackerCallback"><code>TrackerCallback</code></a></p>
+</blockquote>
+<p>A <a href="/callbacks.tracker.html#TrackerCallback"><code>TrackerCallback</code></a> that reduces learning rate when a metric has stopped improving.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This callback tracks the quantity in <code>monitor</code> during the training of <code>learn</code>. <code>mode</code> can be forced to 'min' or 'max' but will automatically try to determine if the quantity should be the lowest possible (validation loss) or the highest possible (accuracy). Will reduce the learning rate by <code>factor</code> after <code>patience</code> epochs if the quantity hasn't improved by <code>min_delta</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Callback-methods">Callback methods<a class="anchor-link" href="#Callback-methods">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You don't call these yourself - they're called by fastai's <a href="/callback.html#Callback"><code>Callback</code></a> system automatically to enable the class's functionality.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="ReduceLROnPlateauCallback.on_train_begin"><code>on_train_begin</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L112" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>on_train_begin</code>(<strong>**<code>kwargs</code></strong>:<code>Any</code>)</p>
+</blockquote>
+<p>Initialize inner arguments.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="ReduceLROnPlateauCallback.on_epoch_end"><code>on_epoch_end</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L117" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>on_epoch_end</code>(<strong><code>epoch</code></strong>, <strong>**<code>kwargs</code></strong>:<code>Any</code>)</p>
+</blockquote>
+<p>Compare the value monitored to its best and maybe reduce lr.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="TrackerCallback"><code>class</code> <code>TrackerCallback</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L27" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>TrackerCallback</code>(<strong><code>learn</code></strong>:<a href="/basic_train.html#Learner"><code>Learner</code></a>, <strong><code>monitor</code></strong>:<code>str</code>=<strong><em><code>'val_loss'</code></em></strong>, <strong><code>mode</code></strong>:<code>str</code>=<strong><em><code>'auto'</code></em></strong>) :: <a href="/basic_train.html#LearnerCallback"><code>LearnerCallback</code></a></p>
+</blockquote>
+<p>A <a href="/basic_train.html#LearnerCallback"><code>LearnerCallback</code></a> that keeps track of the best value in <code>monitor</code>.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="TrackerCallback.get_monitor_value"><code>get_monitor_value</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L43" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_monitor_value</code>()</p>
+</blockquote>
+<p>Pick the monitored value.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Callback-methods">Callback methods<a class="anchor-link" href="#Callback-methods">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>You don't call these yourself - they're called by fastai's <a href="/callback.html#Callback"><code>Callback</code></a> system automatically to enable the class's functionality.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="TrackerCallback.on_train_begin"><code>on_train_begin</code><a href="https://github.com/fastai/fastai/blob/master/fastai/callbacks/tracker.py#L39" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>on_train_begin</code>(<strong>**<code>kwargs</code></strong>:<code>Any</code>)</p>
+</blockquote>
+<p>Initializes the best value.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
+ 
+
