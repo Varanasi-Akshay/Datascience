@@ -1,0 +1,4 @@
+dlib==19.8.1; sys_platform == 'windows'
+dlib; sys_platform == 'darwin'
+face_recognition==1.2.2
+pillow
