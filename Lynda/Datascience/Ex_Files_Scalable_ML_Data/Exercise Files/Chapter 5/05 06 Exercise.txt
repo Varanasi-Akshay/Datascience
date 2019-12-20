@@ -1,0 +1,4 @@
+
+Autoscaling a Kubernetes Cluster
+$  kubectl autoscale deployment ml-deployment --cpu-percent=80  \
+              --min=2 --max=5

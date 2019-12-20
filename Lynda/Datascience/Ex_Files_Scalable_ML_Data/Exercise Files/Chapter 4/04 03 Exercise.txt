@@ -1,0 +1,30 @@
+FROM ubuntu
+
+LABEL classifier_version="1.2"
+LABEL charge_account="0123-45-67890"
+LABEL owner="ML Research Dept."
+
+
+# Install libraries & packages
+RUN apt-get update && apt-get install -y \
+python-pip  \
+python-dev \
+python-numpy  \
+python-scipy \
+python-pip
+
+RUN pip install scikit-learn flask-restful
+
+# Copy model code from current directory
+COPY . /model
+
+# expose the port for the API
+EXPOSE 8100
+
+# set environment variables
+ENV ml_debug_level=1
+ENV environment PRODUCTION
+
+
+# run the API
+CMD [ "python"]

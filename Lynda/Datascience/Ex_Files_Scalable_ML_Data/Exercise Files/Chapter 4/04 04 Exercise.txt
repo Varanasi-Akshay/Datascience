@@ -1,0 +1,15 @@
+04 04 - Build Container Example
+
+$ pwd - show working direcotry
+
+$ ls  - show docker file and diretories
+
+$ cat Dockerfile
+
+$ docker images
+
+$ docker build -t ml_example .
+
+$ docker images
+
+$ docker run -it ml_example

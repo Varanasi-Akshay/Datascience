@@ -1,0 +1,5 @@
+﻿* Encoding: UTF-8.
+
+DATASET ACTIVATE DataSet1.
+COMPUTE Train_Test=RV.BERNOULLI(0.8).
+EXECUTE.
