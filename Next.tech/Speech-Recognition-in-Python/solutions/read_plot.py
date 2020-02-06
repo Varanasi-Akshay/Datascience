@@ -10,13 +10,13 @@ print '\nShape:', audio.shape
 print 'Datatype:', audio.dtype
 print 'Duration:', round(audio.shape[0] / float(sampling_freq), 3), 'seconds'
 
-# Normalize the values
+# Normalize the values. The audio signal is stored as 16-bit signed integer data
 audio = audio / (2.**15)
 
 # Extract first 30 values for plotting
 audio = audio[:30]
 
-# Build the time axis
+# Build the time axis. Let's build this axis, considering the fact that it should be scaled using the sampling frequency factor:
 x_values = np.arange(0, len(audio), 1) / float(sampling_freq)
 
 # Convert to seconds

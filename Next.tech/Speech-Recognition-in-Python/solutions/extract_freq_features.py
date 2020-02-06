@@ -16,6 +16,7 @@ print 'Length of each feature =', mfcc_features.shape[1]
 print '\nFilter bank:\nNumber of windows =', filterbank_features.shape[0]
 print 'Length of each feature =', filterbank_features.shape[1]
 
+# We need to transform the matrix so that the time domain is horizontal:
 # Plot the features
 mfcc_features = mfcc_features.T
 plt.matshow(mfcc_features)

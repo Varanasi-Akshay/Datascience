@@ -5,6 +5,7 @@ from scipy.io.wavfile import write
 # File where the output will be saved
 output_file = 'output_generated.wav'
 
+#  We want to generate a three-second long signal with a sampling frequency of 44100 and a tonal frequency of 587 Hz. The values on the time axis will go from -2*pi to 2*pi:
 # Specify audio parameters
 duration = 3  # seconds
 sampling_freq = 44100  # Hz

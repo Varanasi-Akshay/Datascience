@@ -10,12 +10,21 @@ from python_speech_features import mfcc
 import warnings
 warnings.filterwarnings("ignore")
 
+
+
+
 # Function to parse input arguments
 def build_arg_parser():
     parser = argparse.ArgumentParser(description='Trains the HMM classifier')
     parser.add_argument("--input-folder", dest="input_folder", required=True,
             help="Input folder containing the audio files in subfolders")
     return parser
+
+#Let's initialize the class. We will use Gaussian HMMs to model our data. The n_components parameter defines the number of hidden states. The cov_type defines the type of covariance in our transition matrix, and n_iter indicates the number of iterations it will go through before it stops training:
+
+#The choice of the preceding parameters depends on the problem at hand. You need to have an understanding of your data in order to select these parameters in a smart way. Initialize the variables:
+
+#We built a class to handle HMM training and prediction, but we need some data to see it in action. We will use it in the next step to build a speech recognizer.
 
 # Class to handle all HMM related processing
 class HMMTrainer(object):
@@ -55,7 +64,7 @@ if __name__=='__main__':
         if not os.path.isdir(subfolder): 
             continue
 
-        # Extract the label
+        # Extract the label. The name of the subfolder is the label of this class. Extract it using the following:
         label = subfolder[subfolder.rfind('/') + 1:]
 
         # Initialize variables
@@ -81,6 +90,8 @@ if __name__=='__main__':
             y_words.append(label)
 
         print 'X.shape =', X.shape
+        
+        #Once you have extracted features from all the files in the current class, train and save the HMM model. As HMM is a generative model for unsupervised learning, we don't need labels to build HMM models for each class. We explicitly assume that separate HMM models will be built for each class:
         # Train and save HMM model
         hmm_trainer = HMMTrainer()
         hmm_trainer.train(X)

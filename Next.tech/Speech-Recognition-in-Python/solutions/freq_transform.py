@@ -11,6 +11,9 @@ audio = audio / (2.**15)
 # Extract length
 len_audio = len(audio)
 
+'''
+Let's apply the Fourier transform. The Fourier transform signal is mirrored along the center, so we just need to take the first half of the transformed signal. Our end goal is to extract the power signal. So, we square the values in the signal in preparation for this:
+'''
 # Apply Fourier transform
 transformed_signal = np.fft.fft(audio)
 half_length = np.ceil((len_audio + 1) / 2.0)
@@ -30,7 +33,7 @@ else:
 # Extract power in dB
 power = 10 * np.log10(transformed_signal)
 
-# Build the time axis
+# Build the time axis. We need to scale this according the sampling frequency and then convert this into seconds:
 x_values = np.arange(0, half_length, 1) * (sampling_freq / len_audio) / 1000.0
 
 # Plot the figure
