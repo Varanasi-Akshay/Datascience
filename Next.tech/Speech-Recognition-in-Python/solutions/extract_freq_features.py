@@ -11,10 +11,10 @@ mfcc_features = mfcc(audio, sampling_freq)
 filterbank_features = logfbank(audio, sampling_freq)
 
 # Print parameters
-print '\nMFCC:\nNumber of windows =', mfcc_features.shape[0]
-print 'Length of each feature =', mfcc_features.shape[1]
-print '\nFilter bank:\nNumber of windows =', filterbank_features.shape[0]
-print 'Length of each feature =', filterbank_features.shape[1]
+print('\nMFCC:\nNumber of windows =', mfcc_features.shape[0])
+print('Length of each feature =', mfcc_features.shape[1])
+print('\nFilter bank:\nNumber of windows =', filterbank_features.shape[0])
+print('Length of each feature =', filterbank_features.shape[1])
 
 # We need to transform the matrix so that the time domain is horizontal:
 # Plot the features

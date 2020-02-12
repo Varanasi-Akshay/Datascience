@@ -6,9 +6,9 @@ from scipy.io import wavfile
 sampling_freq, audio = wavfile.read('input_read.wav')
 
 # Print the params
-print '\nShape:', audio.shape
-print 'Datatype:', audio.dtype
-print 'Duration:', round(audio.shape[0] / float(sampling_freq), 3), 'seconds'
+print('\nShape:', audio.shape)
+print('Datatype:', audio.dtype)
+print('Duration:', round(audio.shape[0] / float(sampling_freq), 3), 'seconds')
 
 # Normalize the values. The audio signal is stored as 16-bit signed integer data
 audio = audio / (2.**15)

@@ -16,7 +16,7 @@ Let's apply the Fourier transform. The Fourier transform signal is mirrored alon
 '''
 # Apply Fourier transform
 transformed_signal = np.fft.fft(audio)
-half_length = np.ceil((len_audio + 1) / 2.0)
+half_length = int(np.ceil((len_audio + 1) / 2.0))
 transformed_signal = abs(transformed_signal[0:half_length])
 transformed_signal /= float(len_audio)
 transformed_signal **= 2

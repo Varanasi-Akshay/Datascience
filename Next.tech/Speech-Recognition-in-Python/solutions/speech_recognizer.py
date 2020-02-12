@@ -89,7 +89,7 @@ if __name__=='__main__':
             # Append the label
             y_words.append(label)
 
-        print 'X.shape =', X.shape
+        print('X.shape =', X.shape)
         
         #Once you have extracted features from all the files in the current class, train and save the HMM model. As HMM is a generative model for unsupervised learning, we don't need labels to build HMM models for each class. We explicitly assume that separate HMM models will be built for each class:
         # Train and save HMM model
@@ -115,19 +115,22 @@ if __name__=='__main__':
         mfcc_features = mfcc(audio, sampling_freq)
 
         # Define variables
-        max_score = None
-        output_label = None
+        max_score = float("-inf")
+        output_label = 'None'
 
         # Iterate through all HMM models and pick 
         # the one with the highest score
         for item in hmm_models:
             hmm_model, label = item
+            # print(hmm_model)
+            # print(label)
             score = hmm_model.get_score(mfcc_features)
+            # print(score)
             if score > max_score:
                 max_score = score
                 output_label = label
 
         # Print the output
-        print "\nTrue:", input_file[input_file.find('/')+1:input_file.rfind('/')]
-        print "Predicted:", output_label 
+        print("\nTrue:", input_file[input_file.find('/')+1:input_file.rfind('/')])
+        print("Predicted:", output_label) 
 

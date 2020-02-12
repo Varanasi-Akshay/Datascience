@@ -6,7 +6,7 @@ In this lesson, we will cover the following:
     Synthesizing music (synthesize_music.py)
     Extracting frequency domain features (extract_freq_features.py)
     Building Hidden Markov Models (speech_recognizer.py)
-    Building a speech recognizer
+    Building a speech recognizer	
 
 Speech recognition refers to the process of recognizing and understanding spoken language. Input comes in the form of audio data, and the speech recognizers will process this data to extract meaningful information from it. This has a lot of practical uses, such as voice controlled devices, transcription of spoken language into words, security systems, and so on.
 
@@ -40,4 +40,4 @@ We are now ready to discuss speech recognition. We will use Hidden Markov Models
 
 Let's take a look at how to build HMMs.
 
-We need a database of speech files to build our speech recognizer. We will use the database available here. These data have been provided in the data folder in this lab. This database contains seven different words, where each word has 15 audio files associated with it. This is a small dataset, but this is sufficient to understand how to build a speech recognizer that can recognize seven different words. We need to build an HMM model for each class. When we want to identify the word in a new input file, we need to run all the models on this file and pick the one with the best score. We will use the HMM class that we built in the previous step.
+We need a database of speech files to build our speech recognizer. We will use the database available here. (https://code.google.com/archive/p/hmm-speech-recognition/downloads) These data have been provided in the data folder in this lab. This database contains seven different words, where each word has 15 audio files associated with it. This is a small dataset, but this is sufficient to understand how to build a speech recognizer that can recognize seven different words. We need to build an HMM model for each class. When we want to identify the word in a new input file, we need to run all the models on this file and pick the one with the best score. We will use the HMM class that we built in the previous step.
