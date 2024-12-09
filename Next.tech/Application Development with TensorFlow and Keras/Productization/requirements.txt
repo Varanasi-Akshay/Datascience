@@ -37,4 +37,4 @@ tensorflow-tensorboard==0.4.0rc3
 termstyle==0.1.11
 tqdm
 urllib3==1.22
-Werkzeug==0.13
+Werkzeug==0.15.3
